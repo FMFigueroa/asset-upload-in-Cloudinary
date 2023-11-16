@@ -1,8 +1,7 @@
-use std::path::Path;
-
 use axum::{http::StatusCode, Json};
 use axum_typed_multipart::{FieldData, TryFromField, TryFromMultipart, TypedMultipart};
 use serde::Serialize;
+use std::{fs, path::Path};
 use tempfile::NamedTempFile;
 
 #[derive(TryFromField, Serialize, Clone)]
@@ -53,13 +52,17 @@ pub struct UploadAssetRequest {
 pub async fn upload_asset(
     TypedMultipart(UploadAssetRequest { image, author }): TypedMultipart<UploadAssetRequest>,
 ) -> StatusCode {
-    let file_name = image
-        .metadata
-        .file_name
-        .unwrap_or(String::from("image.bin"));
-    let path = Path::new("/tmp").join(author).join(file_name);
+    let file_name = image.metadata.file_name.unwrap_or(String::from("data.bin"));
+    let user_path = Path::new("./tmp").join(author);
 
-    match image.contents.persist(path) {
+    //Create directory
+    fs::create_dir_all(&user_path).unwrap();
+    let file_path = user_path.join(&file_name);
+
+    println!("{:?}", file_path);
+
+    // upload asset local
+    match image.contents.persist(file_path) {
         Ok(_) => StatusCode::CREATED,
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR,
     }
