@@ -46,16 +46,16 @@ pub struct UploadAssetRequest {
     // field to a specific value you can also specify a limit in bytes, like
     // '5MiB' or '1GiB'.
     #[form_data(limit = "unlimited")]
-    image: FieldData<NamedTempFile>,
+    asset: FieldData<NamedTempFile>,
 
     // This field will be limited to the default size of 1MiB.
     author: String,
 }
 
 pub async fn upload_asset(
-    TypedMultipart(UploadAssetRequest { image, author }): TypedMultipart<UploadAssetRequest>,
+    TypedMultipart(UploadAssetRequest { asset, author }): TypedMultipart<UploadAssetRequest>,
 ) -> StatusCode {
-    let file_name = image.metadata.file_name.unwrap_or(String::from("data.bin"));
+    let file_name = asset.metadata.file_name.unwrap_or(String::from("data.bin"));
     let user_path = Path::new("./tmp").join(&author);
 
     //Create directory
@@ -63,7 +63,7 @@ pub async fn upload_asset(
     let file_path = user_path.join(&file_name);
 
     // Upload asset local
-    match image.contents.persist(&file_path) {
+    match asset.contents.persist(&file_path) {
         Ok(_) => StatusCode::CREATED,
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR,
     };
