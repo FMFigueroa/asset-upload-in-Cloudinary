@@ -1,5 +1,5 @@
 [package]
-name = "uploader_downloader_file"
+name = "asset_upload_in_cloudinary"
 version = "0.1.0"
 edition = "2021"
 
